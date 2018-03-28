@@ -38,7 +38,7 @@ impl Term {
             terminal: true
         }) }
         else {
-            if self.ds.iter().all(|&x| x==0u64) {
+            if self.ds.iter().all(|&x| x==0u64) && self.pi == 0{
                 vec!( Term {
                         factor: self.factor,
                         pi: self.pi,
@@ -129,7 +129,8 @@ fn iterate_until_finished(init_terms: Vec<Term>) -> Vec<Term> {
 }
 
 fn main() {
-    let a = vec!(Term::create_initial(0, 0, 1, 4));
+    let a = vec!(Term::create_initial(0, 0, 1, 5));
     let a = iterate_until_finished(a);
-    println!("{:?}", a);
+    //println!("{:?}", a);
+    println!("{}", a.iter().map(|x| x.factor).sum::<u64>());
 }
