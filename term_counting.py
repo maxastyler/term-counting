@@ -1,18 +1,20 @@
 import numpy as np
 
 class term:
-    def __init__(self, ds, pis, sigmas, deltas):
+    def __init__(self, factor, ds, pis, sigmas, deltas):
+        self.factor = factor
         self.ds = ds
         self.pis = pis
         self.sigmas = sigmas
         self.deltas = deltas
+        self.terminal = False
     def initialise(a, b, c, n):
         l = a+b+c
         ds = np.array([2 for n in range(a)] + [4 for n in range(b)] + [6 for n in range(c)])
         pis = n
         sigmas = np.zeros(l)
         deltas = np.zeros([l, l])
-        return term(ds, pis, sigmas, deltas)
+        return term(1, ds, pis, sigmas, deltas)
 
     #If option is -1, taking from pi and adding to sigmas
     def new_term(self, d_index, option):
@@ -22,7 +24,7 @@ class term:
             sigmas[d_index] += 1
             ds = self.ds.copy() 
             ds[d_index] -= 1
-            t = term(ds, pi, sigmas, self.deltas.copy())
+            t = term(self.factor*self.pis, ds, pi, sigmas, self.deltas.copy())
         else:
             ds = self.ds.copy()
             ds[d_index] -=1
@@ -30,22 +32,26 @@ class term:
             sigmas[option] -= 1
             deltas = self.deltas.copy()
             deltas[option][d_index] += 1
-            t = term(ds, self.pis, sigmas, deltas)
+            t = term(self.factor*self.sigmas[option], ds, self.pis, sigmas, deltas)
         return t
 
     def iterate(self):
         new_terms = []
-        for (i, n) in enumerate(self.ds):
-            if n > 0:
-                if self.pis > 0:
-                    new_terms.append(self.new_term(i, -1))
-                for (s_i, s_n) in enumerate(self.sigmas):
-                    if s_n > 0:
-                        new_terms.append(self.new_term(i, s_i))
+        if sum(self.ds) == 0 and self.pis == 0:
+            self.terminal = True
+            new_terms.append(self)
+        if self.terminal == False:
+            for (i, n) in enumerate(self.ds):
+                if n > 0:
+                    if self.pis > 0:
+                        new_terms.append(self.new_term(i, -1))
+                    for (s_i, s_n) in enumerate(self.sigmas):
+                        if s_n > 0:
+                            new_terms.append(self.new_term(i, s_i))
         return new_terms
 
     def __str__(self):
-        return "d = {}\npi = {}\nsigma = {}\ndeltas = {}".format(self.ds, self.pis, self.sigmas, self.deltas)
+        return "factor = {}\nd = {}\npi = {}\nsigma = {}\ndeltas = {}".format(self.factor, self.ds, self.pis, self.sigmas, self.deltas)
 
 def iterate_term_list(a, n):
     term_list = a.copy()
@@ -54,9 +60,7 @@ def iterate_term_list(a, n):
         for t in term_list:
             new_term_list += t.iterate()
         term_list = new_term_list
-        for i in term_list:
-            print(i)
-        print("\n")
+    return term_list
     
 a = [term.initialise(0, 0, 1, 5)]
-iterate_term_list(a, 3)
+a = iterate_term_list(a, 9)
