@@ -1,7 +1,9 @@
 extern crate nalgebra as na;
 extern crate rayon;
 
-#[derive(Debug)]
+use rayon::prelude::*;
+use std::fmt;
+
 struct Term {
     factor: u64,
     pi: u64,
@@ -36,7 +38,7 @@ impl Term {
             terminal: true
         }) }
         else {
-            if self.ds.iter().fold(0, |a, x| a+x) == 0 {
+            if self.ds.iter().all(|&x| x==0u64) {
                 vec!( Term {
                         factor: self.factor,
                         pi: self.pi,
@@ -102,7 +104,32 @@ impl Term {
     }
 }
 
+impl fmt::Debug for Term {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Factor: {}\nPis: {}\nDS: {}ES: {}Deltas: {}Terminal: {}",
+               self.factor, self.pi, self.ds, self.es, self.deltas, self.terminal
+            )
+    }
+}
+
+fn iterate_terms(terms: Vec<Term>) -> Vec<Term> {
+    let mut new_terms: Vec<Term>= vec!();
+    let mut a: Vec<_> = terms.par_iter().map(|ref x| x.iterate()).collect();
+    for i in a.iter_mut() { new_terms.append(i); }
+    new_terms
+}
+ 
+fn iterate_until_finished(init_terms: Vec<Term>) -> Vec<Term> {
+    let mut terms = init_terms;
+    loop{
+        if terms.iter().all(|ref x| x.terminal) { break }
+        terms = iterate_terms(terms);
+    }
+    terms
+}
+
 fn main() {
-    let a = vec!(Term::create_initial(1, 1, 1, 4));
+    let a = vec!(Term::create_initial(0, 0, 1, 4));
+    let a = iterate_until_finished(a);
     println!("{:?}", a);
 }
