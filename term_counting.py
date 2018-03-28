@@ -78,8 +78,9 @@ def iterate_term_list(a, n):
 def get_factor_simple(term_list):
     return sum([t.factor for t in term_list])
     
-a = [term.initialise(0, 0, 2, 8)]
+a = [term.initialise(1, 0, 0, 2)]
 a = iterate_term_list(a, 12)
+print(sum([i.factor for i in a]))
 #with open("c2_n8", "wb") as f:
 #    pickle.dump(a, f)
 #with open("c1_n4", "rb") as f:
