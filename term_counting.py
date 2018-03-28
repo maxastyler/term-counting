@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 class term:
     def __init__(self, factor, ds, pis, sigmas, deltas):
@@ -53,14 +54,34 @@ class term:
     def __str__(self):
         return "factor = {}\nd = {}\npi = {}\nsigma = {}\ndeltas = {}".format(self.factor, self.ds, self.pis, self.sigmas, self.deltas)
 
+#a is the term list
+#n is the number of times to iterate, or if n==-1, iterate until finished
 def iterate_term_list(a, n):
     term_list = a.copy()
-    for i in range(n):
-        new_term_list = []
-        for t in term_list:
-            new_term_list += t.iterate()
-        term_list = new_term_list
+    if n==-1:
+        while True:
+            new_term_list = []
+            for t in term_list:
+                new_term_list += t.iterate()
+            term_list = new_term_list
+            if sum([not t.terminal for t in term_list]) == 0:
+                break
+    else:
+        for i in range(n):
+            print(i)
+            new_term_list = []
+            for t in term_list:
+                new_term_list += t.iterate()
+            term_list = new_term_list
     return term_list
+
+def get_factor_simple(term_list):
+    return sum([t.factor for t in term_list])
     
-a = [term.initialise(0, 0, 1, 5)]
-a = iterate_term_list(a, 9)
+a = [term.initialise(0, 0, 2, 8)]
+a = iterate_term_list(a, 12)
+#with open("c2_n8", "wb") as f:
+#    pickle.dump(a, f)
+#with open("c1_n4", "rb") as f:
+#    a = pickle.load(f)
+#print(get_factor_simple(a))
