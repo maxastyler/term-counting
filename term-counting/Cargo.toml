@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["Max Tyler <mtyler88@gmail.com>"]
 
 [dependencies]
+nalgebra = "0.14.0"
+rayon = "1.0"
