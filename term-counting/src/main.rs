@@ -113,18 +113,18 @@ impl Term {
         unsafe {
             *self.deltas.get_unchecked_mut(0, 1) += *self.deltas.get_unchecked(1, 0);
             *self.deltas.get_unchecked_mut(1, 0) = 0;
-            if self.es.get_unchecked(1, 0) > self.es.get_unchecked(0, 0) {
-                self.es.swap_unchecked((0, 0), (1, 0));
-                let a = *self.deltas.get_unchecked(0, 0);
-                let b = *self.deltas.get_unchecked(1, 1);
-                *self.deltas.get_unchecked_mut(0, 0) = b;
-                *self.deltas.get_unchecked_mut(1, 1) = a;
-            } else if self.deltas.get_unchecked(1, 1) > self.deltas.get_unchecked(0, 0) {
-                let a = *self.deltas.get_unchecked(0, 0);
-                let b = *self.deltas.get_unchecked(1, 1);
-                *self.deltas.get_unchecked_mut(0, 0) = b;
-                *self.deltas.get_unchecked_mut(1, 1) = a;
-            }
+            //if self.es.get_unchecked(1, 0) > self.es.get_unchecked(0, 0) {
+            //    self.es.swap_unchecked((0, 0), (1, 0));
+            //    let a = *self.deltas.get_unchecked(0, 0);
+            //    let b = *self.deltas.get_unchecked(1, 1);
+            //    *self.deltas.get_unchecked_mut(0, 0) = b;
+            //    *self.deltas.get_unchecked_mut(1, 1) = a;
+            //} else if self.deltas.get_unchecked(1, 1) > self.deltas.get_unchecked(0, 0) {
+            //    let a = *self.deltas.get_unchecked(0, 0);
+            //    let b = *self.deltas.get_unchecked(1, 1);
+            //    *self.deltas.get_unchecked_mut(0, 0) = b;
+            //    *self.deltas.get_unchecked_mut(1, 1) = a;
+            //}
         }
     }
 }
@@ -170,8 +170,8 @@ fn reduce_terms_list(terms: Vec<Term>) -> Vec<Term> {
 fn main() {
     let mut a = vec!(Term::create_initial(0, 0, 2, 8));
     let mut a = iterate_until_finished(a);
-    //let mut a = reduce_terms_list(a);
-    //println!("{:?}", a);
+    let mut a = reduce_terms_list(a);
+    println!("{:?}", a);
     println!("Total factor: {}", a.iter().map(|x| x.factor).sum::<u64>());
     println!("N. graphs: {}", a.len());
 }
