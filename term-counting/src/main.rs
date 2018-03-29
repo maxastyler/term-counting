@@ -131,8 +131,11 @@ impl Term {
 
 impl fmt::Debug for Term {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Factor: {}\nPis: {}\nDS: {}ES: {}Deltas: {}Terminal: {}",
-               self.factor, self.pi, self.ds, self.es, self.deltas, self.terminal
+        //write!(f, "Factor: {}\nPis: {}\nDS: {}ES: {}Deltas: {}Terminal: {}",
+        //       self.factor, self.pi, self.ds, self.es, self.deltas, self.terminal
+        //    )
+        write!(f, "Factor: {}\nES: {}Deltas: {}",
+               self.factor, self.es, self.deltas
             )
     }
 }
