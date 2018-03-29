@@ -3,7 +3,9 @@ extern crate rayon;
 
 use rayon::prelude::*;
 use std::fmt;
+use std::collections::HashMap;
 
+#[derive(Clone)]
 struct Term {
     factor: u64,
     pi: u64,
@@ -102,6 +104,29 @@ impl Term {
             }
         }
     }
+
+    fn sort(&mut self) {
+        if self.es.len() == 2 { self.sort_2d(); }
+    }
+
+    fn sort_2d(&mut self){
+        unsafe {
+            *self.deltas.get_unchecked_mut(0, 1) += *self.deltas.get_unchecked(1, 0);
+            *self.deltas.get_unchecked_mut(1, 0) = 0;
+            if self.es.get_unchecked(1, 0) > self.es.get_unchecked(0, 0) {
+                self.es.swap_unchecked((0, 0), (1, 0));
+                let a = *self.deltas.get_unchecked(0, 0);
+                let b = *self.deltas.get_unchecked(1, 1);
+                *self.deltas.get_unchecked_mut(0, 0) = b;
+                *self.deltas.get_unchecked_mut(1, 1) = a;
+            } else if self.deltas.get_unchecked(1, 1) > self.deltas.get_unchecked(0, 0) {
+                let a = *self.deltas.get_unchecked(0, 0);
+                let b = *self.deltas.get_unchecked(1, 1);
+                *self.deltas.get_unchecked_mut(0, 0) = b;
+                *self.deltas.get_unchecked_mut(1, 1) = a;
+            }
+        }
+    }
 }
 
 impl fmt::Debug for Term {
@@ -128,9 +153,25 @@ fn iterate_until_finished(init_terms: Vec<Term>) -> Vec<Term> {
     terms
 }
 
+fn reduce_terms_list(terms: Vec<Term>) -> Vec<Term> {
+    let mut new_terms = terms;
+    for t in new_terms.iter_mut() { t.sort(); }
+    let mut graph_hash: HashMap<(Vec<_>, Vec<_>), Term> = HashMap::new();
+    for t in new_terms.iter() {
+        if !graph_hash.contains_key(&(t.es.iter().collect(), t.deltas.iter().collect())) {
+            graph_hash.insert((t.es.iter().collect(), t.deltas.iter().collect()), t.clone());
+        } else {
+            graph_hash.get_mut(&(t.es.iter().collect(), t.deltas.iter().collect())).unwrap().factor+=t.factor;
+        }
+    }
+    graph_hash.into_iter().map(|(_, x)| x).collect()
+}
+
 fn main() {
-    let a = vec!(Term::create_initial(0, 0, 1, 5));
-    let a = iterate_until_finished(a);
+    let mut a = vec!(Term::create_initial(0, 0, 2, 8));
+    let mut a = iterate_until_finished(a);
+    //let mut a = reduce_terms_list(a);
     //println!("{:?}", a);
-    println!("{}", a.iter().map(|x| x.factor).sum::<u64>());
+    println!("Total factor: {}", a.iter().map(|x| x.factor).sum::<u64>());
+    println!("N. graphs: {}", a.len());
 }
